@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import Lenis from 'lenis'
 
 // Extend window interface to include lenis
@@ -41,7 +41,6 @@ export const useLenis = () => {
 // Hook to access Lenis scroll position
 export const useLenisScroll = () => {
   const scrollRef = useRef(0)
-  const [, forceUpdate] = useState(0)
 
   useEffect(() => {
     if (!lenisInstance) return

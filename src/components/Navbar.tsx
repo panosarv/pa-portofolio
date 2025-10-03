@@ -19,7 +19,7 @@ export const Navbar = ({ hidden = false }: NavbarProps) => {
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href)
     if (element && window.lenis) {
-      window.lenis.scrollTo(element, {
+      window.lenis.scrollTo(element as HTMLElement, {
         offset: -100, // Account for navbar height
         duration: 1.2,
       })

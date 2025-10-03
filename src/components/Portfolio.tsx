@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef } from 'react'
 import { useSpring, animated } from '@react-spring/web'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
-import Lenis from 'lenis'
 
 /* ----------------------- Data ----------------------- */
 
