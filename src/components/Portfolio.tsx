@@ -287,7 +287,7 @@ const PortfolioItemComponent = ({ item }: PortfolioItemProps) => {
       </ParallaxLayer>
 
       {/* Project Images - appear after title with parallax */}
-      <div className="relative h-screen overflow-hidden z-10">
+      <div className="relative h-[70vh] sm:h-[80vh] md:h-screen overflow-hidden z-10">
         <div className="absolute inset-0">
           {item.images.map((image, imgIndex) => {
             const layout = getImageLayout(imgIndex, item.images.length, item.id)
