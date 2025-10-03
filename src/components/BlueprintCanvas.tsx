@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useGesture } from '@use-gesture/react'
 import { animated, useSpring } from '@react-spring/web'
 
@@ -37,8 +37,8 @@ const projects: Project[] = [
     url: 'cretanroyaltransfer.gr',
     description: 'Transfer company in Crete - Website + Booking System',
     tech: ['Vue', 'Vite', 'Tailwind'],
-    x: 350,
-    y: 800,
+    x: -100,
+    y: 500,
   },
   {
     id: 4,
@@ -55,8 +55,8 @@ const projects: Project[] = [
     url: 'myservicebook.gr',
     description: 'Vehicle service management system with Greek Chamber of Commerce integration',
     tech: ['Vue', 'Vite', 'Tailwind', 'Supabase', 'PostgreSQL', 'Python', 'Deno', 'FastAPI'],
-    x: 700,
-    y: 1200,
+    x: 500,
+    y: 800,
   },
   {
     id: 6,
@@ -64,8 +64,17 @@ const projects: Project[] = [
     url: 'Thesis Project',
     description: 'AI-powered multifactor decision making system for supermarket purchases',
     tech: ['React', 'Material-UI', 'Node.js', 'Express', 'Python', 'FastAPI', 'ML'],
-    x: 1400,
-    y: 1300,
+    x: 1300,
+    y: 1100,
+  },
+  {
+    id: 7,
+    title: 'stroke-prediction',
+    url: 'Uni Project',
+    description: 'Python App for showing the weather conditions in different parts of Greece using the openweather API',
+    tech: ['Python', 'Pygame', 'OpenWeather API'],
+    x: 100,
+    y: 1050,
   },
 ]
 
@@ -74,12 +83,11 @@ interface BlueprintCanvasProps {
 }
 
 export const BlueprintCanvas = ({ onClose }: BlueprintCanvasProps) => {
-  const [position, setPosition] = useState({ x: 0, y: 0 })
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
   const [spring, api] = useSpring(() => ({
-    x: 0,
-    y: 0,
+    x: 200,
+    y: 20,
   }))
 
   const fadeIn = useSpring({
@@ -91,9 +99,9 @@ export const BlueprintCanvas = ({ onClose }: BlueprintCanvasProps) => {
   const bind = useGesture({
     onDrag: ({ offset: [x, y] }) => {
       api.start({ x, y })
-      setPosition({ x, y })
     },
   })
+
 
   return (
     <animated.div style={fadeIn} className="fixed inset-0 bg-gray-700 z-50 overflow-hidden">

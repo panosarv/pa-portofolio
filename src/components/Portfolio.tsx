@@ -1,6 +1,8 @@
-import { useRef } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import { useSpring, animated } from '@react-spring/web'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
+
+/* ----------------------- Data ----------------------- */
 
 interface PortfolioItem {
   id: number
@@ -67,6 +69,8 @@ const portfolioItems: PortfolioItem[] = [
   },
 ]
 
+/* ----------------------- Layout helpers ----------------------- */
+
 interface ImageLayout {
   width: string
   height: string
@@ -76,7 +80,6 @@ interface ImageLayout {
   zIndex: number
 }
 
-// Define different layouts for each image in a project
 const getImageLayout = (imageIndex: number, totalImages: number): ImageLayout => {
   const layouts: ImageLayout[][] = [
     // 2 images
@@ -98,30 +101,153 @@ const getImageLayout = (imageIndex: number, totalImages: number): ImageLayout =>
       { width: '30%', height: '38%', top: '60%', right: '15%', zIndex: 4 },
     ],
   ]
-
   const layoutIndex = Math.min(totalImages - 2, 2)
   return layouts[layoutIndex][imageIndex] || layouts[0][0]
 }
+
+/* ----------------------- Smooth scroll state ----------------------- */
+
+/** Global, rAF-driven scroll values for super-smooth transforms */
+function useRafScroll() {
+  const scrollRef = useRef({
+    y: 0,
+    vh: typeof window !== 'undefined' ? window.innerHeight : 0,
+  })
+  const [, force] = React.useReducer((s) => s + 1, 0)
+
+  useEffect(() => {
+    let raf = 0
+    const onResize = () => {
+      scrollRef.current.vh = window.innerHeight
+    }
+    const loop = () => {
+      // read scroll once per frame
+      scrollRef.current.y = window.scrollY || window.pageYOffset
+      force()
+      raf = requestAnimationFrame(loop)
+    }
+    onResize()
+    raf = requestAnimationFrame(loop)
+    window.addEventListener('resize', onResize)
+    window.addEventListener('orientationchange', onResize)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('orientationchange', onResize)
+    }
+  }, [])
+
+  return scrollRef.current
+}
+
+/* ----------------------- Visual atoms ----------------------- */
+
+/** Truly static page background (never moves) */
+function FixedPageBackground() {
+  return (
+    <div
+      aria-hidden
+      className="fixed inset-0 -z-10 pointer-events-none"
+      style={{
+        background:
+          'radial-gradient(1100px 700px at 80% -20%, rgba(0,0,0,0.06), transparent), linear-gradient(180deg, #fafafa 0%, #ffffff 100%)',
+      }}
+    />
+  )
+}
+
+/** A parallax layer that uses the shared rAF scroll to stay smooth */
+function ParallaxLayer({
+  children,
+  speed,
+  offset = 0,
+  style,
+  className,
+}: {
+  children: React.ReactNode
+  /** speed in px moved per px scrolled within the section (e.g. 0.15) */
+  speed: number
+  /** extra offset in px if you want to nudge initial position */
+  offset?: number
+  style?: React.CSSProperties
+  className?: string
+}) {
+  const { y } = useRafScroll()
+  const ref = useRef<HTMLDivElement>(null)
+  const sectionTop = useSectionTop(ref)
+
+  const translateY = (y - sectionTop) * speed + offset
+
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        transform: `translate3d(0, ${translateY}px, 0)`,
+        willChange: 'transform',
+        backfaceVisibility: 'hidden',
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+/** Get element's absolute top in document space; updates on resize */
+function useSectionTop(trackRef: React.RefObject<HTMLElement | HTMLDivElement>) {
+  const topRef = useRef(0)
+  useEffect(() => {
+    const update = () => {
+      const el = trackRef.current
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      topRef.current = (window.scrollY || window.pageYOffset) + rect.top
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    if (trackRef.current) ro.observe(trackRef.current)
+    window.addEventListener('resize', update)
+    window.addEventListener('orientationchange', update)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', update)
+      window.removeEventListener('orientationchange', update)
+    }
+  }, [trackRef])
+  return topRef.current
+}
+
+/* ----------------------- Item ----------------------- */
 
 interface PortfolioItemProps {
   item: PortfolioItem
   index: number
 }
 
-const PortfolioItemComponent = ({ item, index }: PortfolioItemProps) => {
+const PortfolioItemComponent = ({ item }: PortfolioItemProps) => {
+  // per-item speeds: tweak to taste
+  const imageSpeeds = useMemo(() => {
+    // back layers slower, front layers faster
+    // e.g. first image 0.06, then 0.11, 0.16, 0.21
+    return item.images.map((_, i) => 0.06 + i * 0.05)
+  }, [item.images.length])
+
+  const textSpeed = 0.18 // text scrolls a bit faster than most images for “foreground” feel
+
   return (
     <>
-      {/* Fixed Background Images Section */}
+      {/* Foreground parallax images on a pinned section height */}
       <div className="relative h-screen overflow-hidden">
-        {/* Fixed images layer */}
         <div className="absolute inset-0">
           {item.images.map((image, imgIndex) => {
             const layout = getImageLayout(imgIndex, item.images.length)
-
+            const speed = imageSpeeds[imgIndex] ?? 0.12
             return (
-              <div
+              <ParallaxLayer
                 key={imgIndex}
-                className="absolute"
+                speed={speed}
+                className="absolute overflow-hidden rounded-xl shadow-2xl"
                 style={{
                   width: layout.width,
                   height: layout.height,
@@ -131,49 +257,50 @@ const PortfolioItemComponent = ({ item, index }: PortfolioItemProps) => {
                   zIndex: layout.zIndex,
                 }}
               >
-                <div
-                  className="w-full h-full shadow-2xl overflow-hidden"
-                  style={{
-                    backgroundImage: `url(${image})`,
-                    backgroundAttachment: 'fixed',
-                    backgroundPosition: 'center',
-                    backgroundSize: 'cover',
-                    backgroundRepeat: 'no-repeat',
-                  }}
+                <img
+                  src={image}
+                  alt={`${item.title} ${imgIndex + 1}`}
+                  loading="lazy"
+                  decoding="async"
+                  className="block w-full h-full object-cover"
                 />
-              </div>
+              </ParallaxLayer>
             )
           })}
         </div>
       </div>
 
-      {/* Scrolling Text Section */}
-      <div className="relative bg-white py-20 sm:py-32 px-4 md:px-8">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-xs sm:text-sm font-mono tracking-widest uppercase opacity-50 mb-3 sm:mb-4">
-            {item.category}
-          </p>
-          <h3 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-tight mb-4 sm:mb-6">
-            {item.title}
-          </h3>
-          <p className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-600 leading-relaxed mb-8 sm:mb-12">
-            {item.subtitle}
-          </p>
-          <a
-            href={`https://${item.url}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block group/link"
-          >
-            <span className="text-lg sm:text-xl font-light border-b-2 border-black group-hover/link:border-gray-400 transition-colors">
-              Visit Website →
-            </span>
-          </a>
+      {/* Scrolling Text: same section top, its own (usually faster) speed */}
+      <ParallaxLayer speed={textSpeed}>
+        <div className="relative bg-transparent py-20 sm:py-32 px-4 md:px-8">
+          <div className="max-w-4xl mx-auto">
+            <p className="text-xs sm:text-sm font-mono tracking-widest uppercase opacity-50 mb-3 sm:mb-4">
+              {item.category}
+            </p>
+            <h3 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-tight mb-4 sm:mb-6">
+              {item.title}
+            </h3>
+            <p className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-600 leading-relaxed mb-8 sm:mb-12">
+              {item.subtitle}
+            </p>
+            <a
+              href={`https://${item.url}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block group/link"
+            >
+              <span className="text-lg sm:text-xl font-light border-b-2 border-black group-hover/link:border-gray-400 transition-colors">
+                Visit Website →
+              </span>
+            </a>
+          </div>
         </div>
-      </div>
+      </ParallaxLayer>
     </>
   )
 }
+
+/* ----------------------- Page ----------------------- */
 
 export const Portfolio = () => {
   const ref = useRef<HTMLElement>(null)
@@ -186,9 +313,11 @@ export const Portfolio = () => {
   })
 
   return (
-    <section ref={ref} className="py-20 sm:py-32 px-4 md:px-8 bg-white">
+    <section ref={ref} className="relative py-20 sm:py-32 px-4 md:px-8">
+      {/* Static background that never moves */}
+      <FixedPageBackground />
+
       <div className="max-w-7xl mx-auto">
-        {/* Section Header */}
         <animated.div style={titleSpring} className="mb-16 sm:mb-24 lg:mb-32">
           <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-4 sm:mb-6 leading-tight">
             PORTFOLIO
@@ -199,16 +328,9 @@ export const Portfolio = () => {
           </p>
         </animated.div>
 
-        {/* Portfolio Items */}
-        <div>
-          {portfolioItems.map((item, index) => (
-            <PortfolioItemComponent
-              key={item.id}
-              item={item}
-              index={index}
-            />
-          ))}
-        </div>
+        {portfolioItems.map((item, index) => (
+          <PortfolioItemComponent key={item.id} item={item} index={index} />
+        ))}
       </div>
     </section>
   )
