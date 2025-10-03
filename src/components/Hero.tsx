@@ -53,7 +53,7 @@ export const Hero = () => {
         >
           PANAGIOTIS
           <br />
-          ARVANTIIS
+          ARVANITIS
         </animated.h1>
 
         <animated.div
