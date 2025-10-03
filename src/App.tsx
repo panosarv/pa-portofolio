@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLenis } from './hooks/useLenis'
 import { Loader } from './components/Loader'
+import { Navbar } from './components/Navbar'
 import { Hero } from './components/Hero'
 import { About } from './components/About'
 import { Portfolio } from './components/Portfolio'
@@ -11,6 +12,7 @@ import { Contact } from './components/Contact'
 
 function App() {
   const [loading, setLoading] = useState(true)
+  const [blueprintOpen, setBlueprintOpen] = useState(false)
   useLenis()
 
   if (loading) {
@@ -19,10 +21,11 @@ function App() {
 
   return (
     <div className="overflow-x-hidden">
+      <Navbar hidden={blueprintOpen} />
       <Hero />
       <About />
       <Portfolio />
-      <Projects />
+      <Projects onBlueprintChange={setBlueprintOpen} />
       <Experience />
       <Certifications />
       <Contact />

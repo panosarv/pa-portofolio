@@ -20,7 +20,7 @@ export const About = () => {
   })
 
   return (
-    <section ref={ref} className="min-h-screen py-20 sm:py-32 px-4 md:px-8">
+    <section id="about" ref={ref} className="min-h-screen py-20 sm:py-32 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-center">
           <animated.div style={titleSpring}>

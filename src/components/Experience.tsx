@@ -34,7 +34,7 @@ export const Experience = () => {
   })
 
   return (
-    <section ref={ref} className="min-h-screen py-20 sm:py-32 px-4 md:px-8">
+    <section id="experience" ref={ref} className="min-h-screen py-20 sm:py-32 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
         <animated.h2 style={titleSpring} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-12 sm:mb-20">
           EXPERIENCE

@@ -1,12 +1,20 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useSpring, animated } from '@react-spring/web'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { BlueprintCanvas } from './BlueprintCanvas'
 
-export const Projects = () => {
+interface ProjectsProps {
+  onBlueprintChange?: (open: boolean) => void
+}
+
+export const Projects = ({ onBlueprintChange }: ProjectsProps) => {
   const [showBlueprint, setShowBlueprint] = useState(false)
   const ref = useRef<HTMLElement>(null)
   const isVisible = useScrollAnimation(ref, 0.2)
+
+  useEffect(() => {
+    onBlueprintChange?.(showBlueprint)
+  }, [showBlueprint, onBlueprintChange])
 
   const spring = useSpring({
     opacity: isVisible ? 1 : 0,
@@ -16,7 +24,7 @@ export const Projects = () => {
 
   return (
     <>
-      <section ref={ref} className="min-h-screen py-20 sm:py-32 px-4 md:px-8 bg-black text-white">
+      <section id="projects" ref={ref} className="min-h-screen py-20 sm:py-32 px-4 md:px-8 bg-black text-white">
         <div className="max-w-7xl mx-auto">
           <animated.div style={spring} className="flex flex-col items-center justify-center min-h-[60vh] text-center">
             <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black mb-6 sm:mb-8 leading-tight">

@@ -61,7 +61,7 @@ export const Contact = () => {
   })
 
   return (
-    <footer ref={ref} className="min-h-screen py-20 sm:py-32 px-4 md:px-8 bg-black text-white flex items-center">
+    <footer id="contact" ref={ref} className="min-h-screen py-20 sm:py-32 px-4 md:px-8 bg-black text-white flex items-center">
       <div className="max-w-7xl mx-auto w-full">
         <animated.div style={titleSpring} className="mb-12 sm:mb-20">
           <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black mb-6 sm:mb-8 leading-tight">
