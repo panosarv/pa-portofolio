@@ -29,7 +29,7 @@ export const Contact = () => {
       content: (
         <div className="space-y-2">
           <a
-            href="https://linkedin.com"
+            href="https://www.linkedin.com/in/pngarva/"
             target="_blank"
             rel="noopener noreferrer"
             className="block text-lg sm:text-xl font-light hover:opacity-70 transition-opacity"
@@ -37,7 +37,7 @@ export const Contact = () => {
             LinkedIn
           </a>
           <a
-            href="https://github.com"
+            href="https://github.com/panosarv"
             target="_blank"
             rel="noopener noreferrer"
             className="block text-lg sm:text-xl font-light hover:opacity-70 transition-opacity"
