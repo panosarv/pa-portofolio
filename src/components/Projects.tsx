@@ -42,11 +42,11 @@ export const Projects = ({ onBlueprintChange }: ProjectsProps) => {
               onClick={() => setShowBlueprint(true)}
               className="group relative px-8 sm:px-12 py-4 sm:py-6 border-2 border-white overflow-hidden transition-all hover:scale-105 active:scale-95"
             >
-              <span className="relative z-10 text-sm sm:text-base md:text-lg tracking-widest uppercase font-semibold">
+              <span className="relative z-10 text-sm sm:text-base md:text-lg tracking-widest uppercase font-semibold group-hover:opacity-0 transition-opacity">
                 Explore Projects
               </span>
               <div className="absolute inset-0 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300" />
-              <span className="absolute inset-0 flex items-center justify-center text-black opacity-0 group-hover:opacity-100 transition-opacity text-sm sm:text-base md:text-lg tracking-widest uppercase font-semibold">
+              <span className="absolute inset-0 z-20 flex items-center justify-center text-black opacity-0 group-hover:opacity-100 transition-opacity text-sm sm:text-base md:text-lg tracking-widest uppercase font-semibold">
                 Explore Projects
               </span>
             </button>
