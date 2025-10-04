@@ -8,6 +8,14 @@ interface LoaderProps {
 export const Loader = ({ onComplete }: LoaderProps) => {
   const [progress, setProgress] = useState(0)
 
+  // Logo fade in
+  const fadeIn = useSpring({
+    from: { opacity: 0 },
+    to: { opacity: 1 },
+    config: { duration: 600 },
+  })
+
+  // Final fade out
   const fadeOut = useSpring({
     opacity: progress >= 100 ? 0 : 1,
     config: { duration: 500 },
@@ -25,34 +33,77 @@ export const Loader = ({ onComplete }: LoaderProps) => {
           clearInterval(interval)
           return 100
         }
-        return prev + 2
+        return prev + 1
       })
-    }, 30)
+    }, 25)
 
     return () => clearInterval(interval)
   }, [])
 
+  // Calculate fill height (fills from bottom to top, so invert)
+  const fillHeight = progress
+
   return (
     <animated.div
       style={fadeOut}
-      className="fixed inset-0 bg-black z-[100] flex items-center justify-center"
+      className="fixed inset-0 bg-black z-[100] flex items-center justify-center overflow-hidden"
     >
-      <div className="text-center">
-        <h1 className="text-6xl md:text-8xl font-black text-white mb-8 tracking-tight">
+      <animated.div style={fadeIn} className="relative inline-block">
+        {/* Outlined PA (background) */}
+        <h1
+          className="text-[10rem] sm:text-[15rem] md:text-[20rem] font-black tracking-tighter select-none whitespace-nowrap"
+          style={{
+            color: 'transparent',
+            WebkitTextStroke: '2px rgba(255, 255, 255, 0.3)',
+            lineHeight: '1.2',
+            display: 'block',
+          }}
+        >
           PA
         </h1>
 
-        <div className="w-64 h-1 bg-white/20 overflow-hidden">
+        {/* Filled PA (liquid fill) */}
+        <div
+          className="absolute overflow-hidden"
+          style={{
+            top: '-10%',
+            left: '-10%',
+            right: '-10%',
+            bottom: '-10%',
+            clipPath: `inset(${100 - fillHeight}% 0 0 0)`,
+          }}
+        >
+          <h1
+            className="text-[10rem] sm:text-[15rem] md:text-[20rem] font-black text-white tracking-tighter select-none whitespace-nowrap"
+            style={{
+              lineHeight: '1.2',
+              display: 'block',
+              position: 'relative',
+              top: '11.11%',
+              left: '11.11%',
+            }}
+          >
+            PA
+          </h1>
+
+          {/* Wave effect at the fill line */}
           <div
-            className="h-full bg-white transition-all duration-300 ease-out"
-            style={{ width: `${progress}%` }}
+            className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-70"
+            style={{
+              top: `${100 - fillHeight}%`,
+              filter: 'blur(2px)',
+              animation: 'wave 2s ease-in-out infinite',
+            }}
           />
         </div>
+      </animated.div>
 
-        <p className="text-white/50 text-sm font-mono mt-6">
-          {progress}%
-        </p>
-      </div>
+      <style>{`
+        @keyframes wave {
+          0%, 100% { transform: scaleX(1); }
+          50% { transform: scaleX(1.05); }
+        }
+      `}</style>
     </animated.div>
   )
 }

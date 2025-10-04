@@ -84,10 +84,13 @@ interface BlueprintCanvasProps {
 
 export const BlueprintCanvas = ({ onClose }: BlueprintCanvasProps) => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const [scale, setScale] = useState(1)
 
   const [spring, api] = useSpring(() => ({
     x: 200,
     y: 20,
+    scale: 1,
+    config: { tension: 200, friction: 30 }, // Faster but still smooth
   }))
 
   const fadeIn = useSpring({
@@ -99,6 +102,17 @@ export const BlueprintCanvas = ({ onClose }: BlueprintCanvasProps) => {
   const bind = useGesture({
     onDrag: ({ offset: [x, y] }) => {
       api.start({ x, y })
+    },
+    onWheel: ({ event, delta: [, dy] }) => {
+      event.preventDefault()
+      const newScale = Math.min(Math.max(scale - dy * 0.001, 0.3), 2)
+      setScale(newScale)
+      api.start({ scale: newScale })
+    },
+    onPinch: ({ offset: [d] }) => {
+      const newScale = Math.min(Math.max(d / 200, 0.3), 2)
+      setScale(newScale)
+      api.start({ scale: newScale })
     },
   })
 
@@ -138,6 +152,7 @@ export const BlueprintCanvas = ({ onClose }: BlueprintCanvasProps) => {
         style={{
           x: spring.x,
           y: spring.y,
+          scale: spring.scale,
           cursor: 'grab',
           touchAction: 'none',
         }}

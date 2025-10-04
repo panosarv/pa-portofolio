@@ -17,7 +17,7 @@ export const Contact = () => {
       label: 'Email',
       content: (
         <a
-          href="mailto:contact@example.com"
+          href="mailto:pngarva@gmail.com"
           className="text-xl sm:text-2xl font-light hover:opacity-70 transition-opacity"
         >
           Get in touch

@@ -11,6 +11,8 @@ interface PortfolioItem {
   category: string
   images: string[]
   url: string
+  timeline: string
+  location?: string
 }
 
 const portfolioItems: PortfolioItem[] = [
@@ -25,6 +27,8 @@ const portfolioItems: PortfolioItem[] = [
       '/express-transfer-paros3.png',
     ],
     url: 'expresstransferparos.com',
+    timeline: '2024-2025',
+    location: 'Paros',
   },
   {
     id: 2,
@@ -37,6 +41,8 @@ const portfolioItems: PortfolioItem[] = [
       '/thecretanpathfinders4.png',
     ],
     url: 'thecretanpathfinders.gr',
+    timeline: '2025',
+    location: 'Crete',
   },
   {
     id: 3,
@@ -49,6 +55,8 @@ const portfolioItems: PortfolioItem[] = [
       '/cretanroraltransfer3.png',
     ],
     url: 'cretanroyaltransfer.gr',
+    timeline: '2025',
+    location: 'Crete',
   },
   {
     id: 4,
@@ -57,6 +65,8 @@ const portfolioItems: PortfolioItem[] = [
     category: 'Web Development',
     images: ['/agtransfers1.png', '/agtransfers2.png', '/agtransfers3.png'],
     url: 'agtransfers.gr',
+    timeline: '2025',
+    location: 'Athens',
   },
   {
     id: 5,
@@ -65,6 +75,7 @@ const portfolioItems: PortfolioItem[] = [
     category: 'Full-Stack Application',
     images: ['/myservicebook1.png', '/myservicebook2.png'],
     url: 'myservicebook.gr',
+    timeline: '2025',
   },
 ]
 
@@ -252,6 +263,8 @@ const PortfolioItemComponent = ({ item }: PortfolioItemProps) => {
   }, [item.images.length])
 
   const textSpeed = 0.18 // text scrolls a bit faster than most images for "foreground" feel
+  const floatingTextSpeed1 = 0.08 // slower for background depth
+  const floatingTextSpeed2 = 0.25 // faster for foreground depth
 
   return (
     <>
@@ -259,7 +272,25 @@ const PortfolioItemComponent = ({ item }: PortfolioItemProps) => {
       <ParallaxLayer speed={textSpeed} className="relative z-50">
         <div className="relative bg-transparent py-20 sm:py-32 px-4 md:px-8">
           <div className="max-w-4xl mx-auto">
-            <div style={{ mixBlendMode: 'difference' }}>
+            {/* Floating text elements - Timeline (vertical) */}
+            {item.timeline && (
+              <ParallaxLayer speed={floatingTextSpeed1} className="absolute -top-20 sm:-top-32 left-0 sm:-left-16 z-0">
+                <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-gray-200 opacity-60 whitespace-nowrap" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+                  {item.timeline}
+                </span>
+              </ParallaxLayer>
+            )}
+
+            {/* Floating text elements - Location (vertical) */}
+            {item.location && (
+              <ParallaxLayer speed={floatingTextSpeed2} className="absolute -bottom-20 sm:-bottom-32 right-0 sm:-right-16 z-0">
+                <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-gray-200 opacity-50 whitespace-nowrap" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+                  {item.location}
+                </span>
+              </ParallaxLayer>
+            )}
+
+            <div>
               <p className="text-xs sm:text-sm font-mono tracking-widest uppercase text-black opacity-90 mb-3 sm:mb-4">
                 {item.category}
               </p>
@@ -269,18 +300,17 @@ const PortfolioItemComponent = ({ item }: PortfolioItemProps) => {
               <p className="text-2xl sm:text-3xl md:text-4xl font-light text-black leading-relaxed mb-8 sm:mb-12">
                 {item.subtitle}
               </p>
+              <a
+                href={`https://${item.url}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block group/link pointer-events-auto bg-white rounded-full px-6 py-3 shadow-lg hover:shadow-xl transition-shadow border-4 border-double border-black"
+              >
+                <span className="text-lg sm:text-xl font-light text-black group-hover/link:text-gray-600 transition-colors">
+                  Visit Website →
+                </span>
+              </a>
             </div>
-            <a
-              href={`https://${item.url}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block group/link pointer-events-auto bg-white rounded-full px-6 py-3 shadow-lg hover:shadow-xl transition-shadow"
-              style={{ mixBlendMode: 'normal' }}
-            >
-              <span className="text-lg sm:text-xl font-light text-black group-hover/link:text-gray-600 transition-colors">
-                Visit Website →
-              </span>
-            </a>
           </div>
         </div>
       </ParallaxLayer>
@@ -291,11 +321,14 @@ const PortfolioItemComponent = ({ item }: PortfolioItemProps) => {
           {item.images.map((image, imgIndex) => {
             const layout = getImageLayout(imgIndex, item.images.length, item.id)
             const speed = imageSpeeds[imgIndex] ?? 0.12
+            // Alternate border pattern: odd indices get borders, even don't (or mix based on item.id + imgIndex)
+            const hasBorder = (item.id + imgIndex) % 2 === 0
+
             return (
               <ParallaxLayer
                 key={imgIndex}
                 speed={speed}
-                className="absolute overflow-hidden rounded-xl shadow-2xl"
+                className="absolute shadow-2xl"
                 style={{
                   width: layout.width,
                   height: layout.height,
@@ -305,19 +338,60 @@ const PortfolioItemComponent = ({ item }: PortfolioItemProps) => {
                   zIndex: layout.zIndex,
                 }}
               >
-                <img
-                  src={image}
-                  alt={`${item.title} ${imgIndex + 1}`}
-                  loading="lazy"
-                  decoding="async"
-                  className="block w-full h-full object-cover"
-                />
+                {hasBorder ? (
+                  // Fashion magazine-inspired image border - double border like navbar
+                  <div className="relative w-full h-full border-4 border-double border-black p-2 bg-white">
+                    <div className="relative w-full h-full overflow-hidden">
+                      <img
+                        src={image}
+                        alt={`${item.title} ${imgIndex + 1}`}
+                        loading="lazy"
+                        decoding="async"
+                        className="block w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  // No border - just image with rounded corners
+                  <div className="relative w-full h-full overflow-hidden rounded-lg">
+                    <img
+                      src={image}
+                      alt={`${item.title} ${imgIndex + 1}`}
+                      loading="lazy"
+                      decoding="async"
+                      className="block w-full h-full object-cover"
+                    />
+                  </div>
+                )}
               </ParallaxLayer>
             )
           })}
         </div>
       </div>
     </>
+  )
+}
+
+/* ----------------------- Wrapper with delayed animation ----------------------- */
+
+interface PortfolioItemWrapperProps {
+  item: PortfolioItem
+  index: number
+  isVisible: boolean
+}
+
+const PortfolioItemWrapper = ({ item, index, isVisible }: PortfolioItemWrapperProps) => {
+  const itemSpring = useSpring({
+    opacity: isVisible ? 1 : 0,
+    transform: isVisible ? 'translateY(0px)' : 'translateY(50px)',
+    config: { tension: 120, friction: 20 },
+    delay: isVisible ? 400 + index * 200 : 0, // Title finishes ~400ms, then stagger each item by 200ms
+  })
+
+  return (
+    <animated.div style={itemSpring} className={index === 0 ? 'mt-20 sm:mt-32 lg:mt-40' : ''}>
+      <PortfolioItemComponent item={item} index={index} />
+    </animated.div>
   )
 }
 
@@ -352,9 +426,7 @@ export const Portfolio = () => {
 
         {/* Portfolio items with parallax */}
         {portfolioItems.map((item, index) => (
-          <div key={item.id} className={index === 0 ? 'mt-20 sm:mt-32 lg:mt-40' : ''}>
-            <PortfolioItemComponent item={item} index={index} />
-          </div>
+          <PortfolioItemWrapper key={item.id} item={item} index={index} isVisible={isVisible} />
         ))}
       </div>
     </section>

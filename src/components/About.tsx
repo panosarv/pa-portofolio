@@ -33,7 +33,7 @@ export const About = () => {
             </h2>
           </animated.div>
 
-          <animated.div style={contentSpring} className="space-y-4 sm:space-y-6 text-base sm:text-lg leading-relaxed">
+          <animated.div style={contentSpring} className="space-y-4 sm:space-y-6 text-base sm:text-lg leading-relaxed text-justify">
             <p className="font-light">
               Full-stack developer with a passion for creating seamless digital experiences
               that blend functionality with aesthetic appeal. Specializing in modern web
