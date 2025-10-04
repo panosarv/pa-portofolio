@@ -99,22 +99,29 @@ export const BlueprintCanvas = ({ onClose }: BlueprintCanvasProps) => {
     config: { duration: 400 },
   })
 
-  const bind = useGesture({
-    onDrag: ({ offset: [x, y] }) => {
-      api.start({ x, y })
+  const bind = useGesture(
+    {
+      onDrag: ({ offset: [x, y] }) => {
+        api.start({ x, y })
+      },
+      onWheel: ({ event, delta: [, dy] }) => {
+        event.preventDefault()
+        const newScale = Math.min(Math.max(scale - dy * 0.001, 0.3), 2)
+        setScale(newScale)
+        api.start({ scale: newScale })
+      },
+      onPinch: ({ offset: [s] }) => {
+        // offset[0] for pinch is the scale factor relative to initial scale
+        const newScale = Math.min(Math.max(s, 0.3), 2)
+        setScale(newScale)
+        api.start({ scale: newScale })
+      },
     },
-    onWheel: ({ event, delta: [, dy] }) => {
-      event.preventDefault()
-      const newScale = Math.min(Math.max(scale - dy * 0.001, 0.3), 2)
-      setScale(newScale)
-      api.start({ scale: newScale })
-    },
-    onPinch: ({ offset: [d] }) => {
-      const newScale = Math.min(Math.max(d / 200, 0.3), 2)
-      setScale(newScale)
-      api.start({ scale: newScale })
-    },
-  })
+    {
+      drag: { from: () => [spring.x.get(), spring.y.get()] },
+      pinch: { scaleBounds: { min: 0.3, max: 2 }, rubberband: true },
+    }
+  )
 
 
   return (
